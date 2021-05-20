@@ -75,14 +75,15 @@ class AppService(AppServiceInterface, BaseService):
         while True:
             interval = 60
             for s in await self.get_service('data_svc').locate('schedules'):
-                now = datetime.now().time()
-                diff = datetime.combine(date.today(), now) - datetime.combine(date.today(), s.schedule)
-                if interval > diff.total_seconds() > 0:
-                    self.log.debug('Pulling %s off the scheduler' % s.name)
-                    sop = copy.deepcopy(s.task)
-                    sop.set_start_details()
-                    await self._services.get('data_svc').store(sop)
-                    self.loop.create_task(sop.run(self.get_services()))
+                now = datetime.now()
+                if now.date() == s.schedule.date():
+                    diff = datetime.combine(date.today(), now.time()) - datetime.combine(date.today(), s.schedule.time())
+                    if interval > diff.total_seconds() > 0:
+                        self.log.debug('Pulling %s off the scheduler' % s.name)
+                        sop = copy.deepcopy(s.task)
+                        sop.set_start_details()
+                        await self._services.get('data_svc').store(sop)
+                        self.loop.create_task(sop.run(self.get_services()))
             await asyncio.sleep(interval)
 
     async def resume_operations(self):

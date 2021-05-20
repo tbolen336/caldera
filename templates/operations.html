@@ -121,7 +121,7 @@
               <h5>Schedule</h5>
           </div>
           <div id="schedules-options" class="sidebar-cutout" style="display: none;">
-              <input type="time" id="schedule-time" onchange="checkOpformValid()">
+              <input type="datetime-local" id="schedule-time" onchange="checkOpformValid()">
               <button id="scheduleBtn" type="button" style="opacity:0.5;" disabled="true" class="button-notready atomic-button" onclick="handleScheduleAction()">
                   Schedule
               </button>
@@ -365,7 +365,7 @@
         function deleteCallback(data){
             // Remove operation from main view
             $('.op-selected').css('visibility', 'hidden');
-            
+
             // Remove operation from sidebar dropdown
             $('#operation-list option[value="' + operation_id + '"]').remove();
             $('#operationDefault').prop('selected', true);
@@ -382,9 +382,10 @@
 
     function handleScheduleAction(){
         let op = buildOperationObject();
-        let time = document.getElementById("schedule-time").value;
+        let dtime = document.getElementById("schedule-time").value;
+        let time = parseInt(dtime.split(" ")[1]);
         restRequest('PUT', {'index': 'schedule', 'operation': op, 'schedule':
-                {'hour': parseInt(time.split(":")[0]), 'minute': parseInt(time.split(":")[1])}}, doNothing);
+                {'hour': parseInt(time.split(":")[0]), 'minute': parseInt(time.split(":")[1]), 'day': parseInt(dtime.split("-")[2]), 'month': parseInt(dtime.split("-")[1]), 'year': parseInt(dtime.split("-")[0]) }}, doNothing);
         stream('New operation scheduled!');
     }
 
